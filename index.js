@@ -1,49 +1,39 @@
-// console.log("Welcome to node.js!!!!")
+const contactFunc = require("./contacts");
+const { Command } = require("commander");
 
-// const twoArr = require("./contacts.mjs");
-// console.log(twoArr);
+const program = new Command();
+program
+  .option("-a, --action <action>", "choose action")
+  .option("-i, --id <id>", "user id")
+  .option("-n, --name <name>", "user name")
+  .option("-e, --email <email>", "user email")
+  .option("-p, --phone <phone>", "user phone");
 
-// const {abc} = require("./contacts.mjs");
-// console.log(abc);
+program.parse(process.argv);
 
-// import alphabetAndNumb from "./contacts.js"
-// console.log(alphabetAndNumb);
+const argv = program.opts();
 
-// const fs = require("fs/promises");
-// import fs from "fs/promises";
-// import db from "./db";
-
-// const contactsPath = require("./db/contacts.json");
-
-
-const books = require("./db");
-
-const invokeAction = async ({ action, id, title, author }) => {
+async function invokeAction({ action, id, name, email, phone }) {
   switch (action) {
-    case "read":
-      const allBooks = await books.getAll();
-      return console.log(allBooks);
+    case "list":
+      const contacts = await contactFunc.listContacts();
+      return console.table(contacts);
+
+    case "get":
+      const contact = await contactFunc.getContactById(id);
+      return console.log(contact);
+
+    case "add":
+      const newContact = await contactFunc.addContact(name, email, phone);
+      return console.log(newContact);
+
+    case "remove":
+      const removeContact = await contactFunc.removeContact(id);
+      return console.log(removeContact);
+
+    default:
+      console.warn("\x1B[31m Unknown action type!");
   }
-};
+}
 
-invokeAction({ action: "read" });
-invokeAction({ action: "getById", id: "AeHIrLTr6JkxGE6SN-0Rw" });
-
-
-
-
-
-
-// const readFile = async () => {
-//   const data = await fs.readFile("./db/file.txt", "utf-8");
-//   console.log(data);
-// };
-
-// readFile();
-
-// const addText = async () => {
-//   const text = await fs.appendFileFile("./db/file.txt", "\nQWERTYUIO");
-//   console.log(text);
-// };
-
-// addText();
+invokeAction(argv);
